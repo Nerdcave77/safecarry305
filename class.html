@@ -861,7 +861,7 @@
               <span class="tick">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </span>
-              <span>Pick your format: group class (3 hours, max 4 students) or private 1-on-1 (2 hours). Both are $150. For a private 1-on-1, leave your phone number and an instructor will call you to schedule the class.</span>
+              <span>Pick your format: group class (3 hours, max 4 students) or private 1-on-1 (2 hours). Both are $150. For a private 1-on-1, you will give your phone number at checkout and an instructor will call you to schedule the class.</span>
             </li>
             <li>
               <span class="tick">
@@ -900,17 +900,11 @@
               <option value="private">Private 1-on-1 · 2 hours</option>
             </select>
           </div>
-          <div class="field" id="phoneField" hidden>
-            <label for="fPhone">Phone number</label>
-            <input type="tel" id="fPhone" name="phone" autocomplete="tel" inputmode="tel" placeholder="(305) 555-0123" />
-            <p class="field-help">Private 1-on-1 classes are scheduled directly with an instructor. Leave the best number to reach you and an instructor will call to set up your class.</p>
-            <p class="field-error" id="phoneError" role="alert" hidden>Please enter your phone number so an instructor can call to schedule your class.</p>
-          </div>
           <div class="total-row">
             <span>Total due to reserve</span>
             <span class="total-price">$150</span>
           </div>
-          <a class="btn btn-primary submit-btn" id="reserveBtn" href="mailto:cguerra216@gmail.com?subject=Class%20registration%20-%20Safe%20Carry%20305&amp;body=Hi%20Safe%20Carry%20305%2C%0D%0A%0D%0AI%27d%20like%20to%20reserve%20a%20seat%20in%20the%20next%20class.%0D%0A%0D%0AFormat%3A%20Group%20class%20(3%20hours)%0D%0AName%3A%20%0D%0APhone%3A%20">Reserve your seat · $150</a>
+          <a class="btn btn-primary submit-btn" id="reserveBtn" href="https://buy.stripe.com/6oUfZhaIMcSb9Gtgs06Vq02" target="_blank" rel="noopener">Reserve your seat · $150</a>
           <p class="checkout-note">Payment is due in full to confirm your seat. Cancel at least 48 hours before class start for a full refund.</p>
           <p class="checkout-ig">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1062,55 +1056,23 @@
           document.querySelectorAll(".reveal:not(.in)").forEach(function (el) { el.classList.add("in"); });
         }, 2600);
 
-        /* Checkout card: keep the summary and reserve email in sync with the format picker.
-           Private 1-on-1 bookings ask for a phone number so an instructor can call to schedule. */
+        /* Checkout card: keep the summary and the Stripe payment link in sync with the
+           format picker. Stripe collects the phone number at checkout, so no phone
+           field is needed on the page. */
         var formatSelect = document.getElementById("fFormat");
         var formatSummary = document.getElementById("formatSummary");
         var reserveBtn = document.getElementById("reserveBtn");
-        var phoneField = document.getElementById("phoneField");
-        var phoneInput = document.getElementById("fPhone");
-        var phoneError = document.getElementById("phoneError");
         var formats = {
-          group: { summary: "Group class · 3 hours", label: "Group class (3 hours)" },
-          private: { summary: "Private 1-on-1 · 2 hours", label: "Private 1-on-1 (2 hours)" }
+          group: { summary: "Group class · 3 hours", link: "https://buy.stripe.com/6oUfZhaIMcSb9Gtgs06Vq02" },
+          private: { summary: "Private 1-on-1 · 2 hours", link: "https://buy.stripe.com/8x29ATdUY2dxaKx2Ba6Vq01" }
         };
-        function isPrivate() { return formatSelect.value === "private"; }
-        function phoneValid() { return phoneInput.value.replace(/\D/g, "").length >= 7; }
         function syncCheckout() {
           var f = formats[formatSelect.value] || formats.group;
           formatSummary.textContent = f.summary;
-          phoneField.hidden = !isPrivate();
-          if (!isPrivate()) {
-            phoneError.hidden = true;
-            phoneInput.classList.remove("invalid");
-          }
-          var body;
-          if (isPrivate()) {
-            body = "Hi Safe Carry 305,\r\n\r\nI'd like to book a private 1-on-1 class (2 hours, $150). Please have an instructor contact me to schedule my class.\r\n\r\nFormat: " + f.label + "\r\nName: \r\nPhone: " + phoneInput.value;
-          } else {
-            body = "Hi Safe Carry 305,\r\n\r\nI'd like to reserve a seat in the next class.\r\n\r\nFormat: " + f.label + "\r\nName: \r\nPhone: ";
-          }
-          reserveBtn.href = "mailto:cguerra216@gmail.com?subject=" +
-            encodeURIComponent("Class registration - Safe Carry 305") +
-            "&body=" + encodeURIComponent(body);
+          reserveBtn.href = f.link;
         }
-        if (formatSelect && formatSummary && reserveBtn && phoneField && phoneInput) {
+        if (formatSelect && formatSummary && reserveBtn) {
           formatSelect.addEventListener("change", syncCheckout);
-          phoneInput.addEventListener("input", function () {
-            if (phoneValid()) {
-              phoneError.hidden = true;
-              phoneInput.classList.remove("invalid");
-            }
-            syncCheckout();
-          });
-          reserveBtn.addEventListener("click", function (event) {
-            if (isPrivate() && !phoneValid()) {
-              event.preventDefault();
-              phoneError.hidden = false;
-              phoneInput.classList.add("invalid");
-              phoneInput.focus();
-            }
-          });
           syncCheckout();
         }
       })();
